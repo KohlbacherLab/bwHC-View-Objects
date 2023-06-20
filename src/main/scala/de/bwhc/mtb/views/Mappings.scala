@@ -14,6 +14,7 @@ import DateTimeFormatter.{
   ISO_LOCAL_DATE_TIME,
   ISO_INSTANT
 }
+import scala.util.Try
 import cats.Id
 import cats.data.NonEmptyList
 import cats.syntax.either._
@@ -101,129 +102,27 @@ trait mappings
   }
 
 
-/*
-  implicit def icd10ToDisplay(
-    implicit icd10gm: ICD10GMCatalogs
-  ): Coding[ICD10GM] => ICD10Display = {
-     icd10 =>     
-       icd10gm.coding(
-         icd.ICD10GM.Code(icd10.code.value),
-       )
-       .map(c => ICD10Display(s"${c.code.value}: ${c.display}"))
-       .getOrElse(ICD10Display(s"${icd10.code.value}: ${icd10.display.getOrElse("N/A")}"))
-  }
-
-
-  implicit def icdO3TtoDisplay(
-    implicit icdO3: ICDO3Catalogs
-  ): Coding[ICDO3T] => ICDO3TDisplay = {
-     icdO3T =>
-      icdO3.topographyCodings()
-        .find(_.code == icd.ICDO3.TopographyCode(icdO3T.code.value))
-        .map(c => ICDO3TDisplay(s"${c.code.value}: ${c.display}"))
-        .getOrElse(ICDO3TDisplay(s"${icdO3T.code.value}: ${icdO3T.display.getOrElse("N/A")}"))
-  }
-
-
-  implicit def icdO3MtoDisplay(
-    implicit icdO3: ICDO3Catalogs
-  ): Coding[ICDO3M] => ICDO3MDisplay = {
-    icdO3M =>
-      icdO3.morphologyCodings()
-        .find(_.code == icd.ICDO3.MorphologyCode(icdO3M.code.value))
-        .map(c => ICDO3MDisplay(s"${c.code.value}: ${c.display}"))
-        .getOrElse(ICDO3MDisplay(s"${icdO3M.code.value}: ${icdO3M.display.getOrElse("N/A")}"))
-  }
-*/
-
   implicit val icd10ToDisplay: Coding[ICD10GM] => ICD10Display = 
     _.complete pipe (
       icd10 => ICD10Display(s"${icd10.code.value}: ${icd10.display.getOrElse("N/A")}")
     )
 
   implicit val icdO3TtoDisplay: Coding[ICDO3T] => ICDO3TDisplay = 
-    _.complete pipe (
-      icdo3 => ICDO3TDisplay(s"${icdo3.code.value}: ${icdo3.display.getOrElse("N/A")}")
-    )
-  
-  implicit val icdO3MtoDisplay: Coding[ICDO3M] => ICDO3MDisplay = 
-    _.complete pipe (
-      icdo3 => ICDO3MDisplay(s"${icdo3.code.value}: ${icdo3.display.getOrElse("N/A")}")
-    )
-  
-/*
-  implicit def medicationCodingsToDisplay(
-    implicit medications: MedicationCatalog
-  ): List[Medication.Coding] => MedicationDisplay = {
-    meds =>
-      MedicationDisplay(
-        meds.map(
-          coding =>
-
-            coding.system match {
-
-              case Medication.System.ATC => 
-                (
-                 for {
-                   version <- coding.version
-                   med     <- medications.findWithCode(coding.code.value,version)
-                   clss    <- med.parent.flatMap(medications.find(_,version))
-                 } yield s"${med.name} (Klasse: ${clss.name})"
-                )
-                .getOrElse(s"${coding.display.getOrElse("N/A")} (${coding.code.value})")
-
-              case Medication.System.Unregistered =>
-                s"${coding.display.getOrElse("N/A")} (${coding.code.value})"
-
-            }
+    coding =>
+      Try(coding.complete)
+        .map(
+          icdo3 => ICDO3TDisplay(s"${icdo3.code.value}: ${icdo3.display.get}")
         )
-        .reduceLeftOption(_ + ", " + _)
-        .getOrElse("N/A")
-      )
-  }
+        .getOrElse(ICDO3TDisplay(s"${coding.code.value}: ${coding.display.getOrElse("N/A")}"))
 
+  implicit val icdO3MtoDisplay: Coding[ICDO3M] => ICDO3MDisplay = 
+    coding =>
+      Try(coding.complete)
+        .map(
+          icdo3 => ICDO3MDisplay(s"${icdo3.code.value}: ${icdo3.display.get}")
+        )
+        .getOrElse(ICDO3MDisplay(s"${coding.code.value}: ${coding.display.getOrElse("N/A")}"))
 
-  implicit def medicationCodingsToDisplayWithClasses(
-    implicit medications: MedicationCatalog
-  ): List[Medication.Coding] => (MedicationDisplay,MedicationDisplay) = {
-    meds =>
-
-      val (drugs,classes) = 
-        meds.foldLeft(
-          (List.empty[String],List.empty[String])
-        ){
-          case ((drgs,clsses),coding) =>
-        
-            coding.system match {
-        
-              case Medication.System.ATC => {
-                (
-                 for {
-                   version <- coding.version
-                   med     <- medications.findWithCode(coding.code.value,version)
-                   clss    =  med.parent.flatMap(medications.find(_,version))
-                 } yield {
-                   (drgs :+ med.name, clsses ++ clss.map(_.name))
-                 }
-                )
-                .getOrElse(
-                  (drgs :+ s"${coding.display.getOrElse("N/A")} (${coding.code.value})", clsses)
-                )
-              }
-        
-            case Medication.System.Unregistered =>
-              (drgs :+ s"${coding.display.getOrElse("N/A")} (${coding.code.value})", clsses)
-        
-          }
-        }
-
-    (
-     MedicationDisplay(Option(drugs).filter(_.nonEmpty).map(_.mkString(", ")).getOrElse("N/A")),
-     MedicationDisplay(Option(classes).filter(_.nonEmpty).map(_.mkString(", ")).getOrElse("N/A")),
-    )
-      
-  }
-*/
 
   implicit val medicationCodingToDisplay: Medication.Coding => MedicationDisplay = {
     med =>

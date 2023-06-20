@@ -21,7 +21,7 @@ lazy val root = project.in(file("."))
       "de.bwhc"        %% "mtb-dto-extensions"      % "1.0-SNAPSHOT",
       "de.bwhc"        %% "mtb-dto-generators"      % "1.0-SNAPSHOT" % Test,
       "de.bwhc"        %% "hgnc-impl"               % "1.0" % Test,
-      "de.bwhc"        %% "icd-catalogs-impl"       % "1.0" % Test,
+      "de.bwhc"        %% "icd-catalogs-impl"       % "1.1" % Test,
       "de.bwhc"        %% "medication-catalog-impl" % "1.0" % Test,
    )
  )
