@@ -221,6 +221,12 @@ trait mappings
   }
 
 
+  private val progression =
+    Set(
+      RECIST.PD,
+      RECIST.SD
+    )
+
   implicit def guidelineTherapyToView[T <: GuidelineTherapy]:
     ((
      T,
@@ -246,7 +252,10 @@ trait mappings
             medicationClasses.toRight(NotAvailable),
             NotAvailable.asLeft[String],
             response.map(_.mapTo[ResponseDisplay]).toRight(NotAvailable),
-            response.filter(_.value.code == RECIST.PD).map(_.effectiveDate).toRight(Undefined),
+            response.collect { 
+              case resp if progression contains resp.value.code => resp.effectiveDate
+            }
+            .toRight(Undefined),
           )
         
         case th: LastGuidelineTherapy =>
@@ -262,7 +271,10 @@ trait mappings
               .flatMap(c => ValueSet[GuidelineTherapy.StopReason.Value].displayOf(c.code))
               .toRight(NotAvailable),
             response.map(_.mapTo[ResponseDisplay]).toRight(NotAvailable),
-            response.filter(_.value.code == RECIST.PD).map(_.effectiveDate).toRight(Undefined),
+            response.collect { 
+              case resp if progression contains resp.value.code => resp.effectiveDate
+            }
+            .toRight(Undefined),
           )
       
       }
