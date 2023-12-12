@@ -4,7 +4,7 @@
 name := "mtb-views"
 ThisBuild / organization := "de.bwhc"
 ThisBuild / scalaVersion := "2.13.8"
-ThisBuild / version := "1.0-SNAPSHOT"
+ThisBuild / version := "1.0"
 
 
 //-----------------------------------------------------------------------------
@@ -17,12 +17,12 @@ lazy val root = project.in(file("."))
     libraryDependencies ++= Seq(
       "org.scalatest"  %% "scalatest"               % "3.1.1" % Test,
       "de.bwhc"        %% "utils"                   % "1.1",
-      "de.bwhc"        %% "mtb-dtos"                % "1.0-SNAPSHOT",
-      "de.bwhc"        %% "mtb-dto-extensions"      % "1.0-SNAPSHOT",
-      "de.bwhc"        %% "mtb-dto-generators"      % "1.0-SNAPSHOT" % Test,
+      "de.bwhc"        %% "mtb-dtos"                % "1.0",
+      "de.bwhc"        %% "mtb-dto-extensions"      % "1.0",
+      "de.bwhc"        %% "mtb-dto-generators"      % "1.0" % Test,
       "de.bwhc"        %% "hgnc-impl"               % "1.0" % Test,
       "de.bwhc"        %% "icd-catalogs-impl"       % "1.1" % Test,
-      "de.bwhc"        %% "medication-catalog-impl" % "1.0" % Test,
+      "de.bwhc"        %% "medication-catalog-impl" % "1.1" % Test,
    )
  )
 
