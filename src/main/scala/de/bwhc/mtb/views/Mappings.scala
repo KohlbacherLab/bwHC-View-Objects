@@ -127,7 +127,7 @@ trait mappings
   implicit val medicationCodingToDisplay: Medication.Coding => MedicationDisplay = {
     med =>
       MedicationDisplay(
-        med.complete pipe (coding => s"${coding.display.getOrElse("N/A")} (${coding.code.value})")
+        med.complete pipe (coding => coding.display.getOrElse("N/A"))
       )
   }
 
@@ -136,7 +136,7 @@ trait mappings
     meds =>
       MedicationDisplay(
         meds.map(
-          _.complete pipe (coding => s"${coding.display.getOrElse("N/A")} (${coding.code.value})")
+          _.complete pipe (coding => coding.display.getOrElse("N/A"))
         )
         .reduceLeftOption(_ + ", " + _)
         .getOrElse("N/A")
@@ -158,7 +158,7 @@ trait mappings
             )
         }  
 
-      drugs.mapTo[MedicationDisplay] -> classes.mapTo[MedicationDisplay]
+      drugs.mapTo[MedicationDisplay] -> classes.distinctBy(_.display).mapTo[MedicationDisplay]
         
   }
 
