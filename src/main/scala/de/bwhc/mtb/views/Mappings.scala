@@ -812,6 +812,7 @@ trait mappings
       response,
       progressionDate
     )
+
   }
 
 
@@ -916,8 +917,9 @@ trait mappings
         .mapTo[List[ClaimStatusView]],
 
         (
-          mtbfile.molecularTherapies.getOrElse(List.empty)
-            .filterNot(_.history.isEmpty).map(_.history.head),
+          mtbfile.molecularTherapies
+            .getOrElse(List.empty)
+            .flatMap(_.history.maxByOption(_.recordedOn)),
           mtbfile.recommendations.getOrElse(List.empty), 
           diagnoses,
           ngsReports,
